@@ -18,7 +18,7 @@ func GinRouteHandler(c *gin.Context) {
 		return
 	}
 
-	db := OpenDB(config.DatabasePath)
+	db := lib.OpenDB(config.DatabasePath)
 	defer db.Close()
 	link := new(lib.LongLink)
 

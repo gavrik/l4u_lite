@@ -1,19 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"lib"
 )
 
-const appName string = "l4uApplication"
-const defaultConfigPath string = "./config.yaml"
-const databaseVersion int = 1
+// AppName -
+const AppName string = "l4uApplication"
 
 var config = new(AppConfig)
-
-// ErrWrongDBVersion - Error
-var ErrWrongDBVersion = errors.New("Wrong database version")
 
 // AppConfig - Application config
 type AppConfig struct {
@@ -26,20 +21,13 @@ type AppConfig struct {
 
 func main() {
 	var dbversion int
-	configPath, err := lib.ReadEnvironmentVariable("CONFIG_PATH", defaultConfigPath)
+	configPath, _ := lib.ReadEnvironmentVariable("CONFIG_PATH", lib.DefaultConfigPath)
 
 	lib.ParseConfig(configPath, config)
 	fmt.Println(config)
 
-	db := OpenDB(config.DatabasePath)
-	dbversion, err = db.CheckDBversion()
-	if err != nil {
-		panic(err)
-	}
-	if dbversion != databaseVersion {
-		panic(ErrWrongDBVersion.Error())
-	}
-	db.Close()
+	dbversion, _ = lib.ChackDBVersion(config.DatabasePath)
+	fmt.Println(dbversion)
 
 	engine := lib.CreateGINEnvironment()
 

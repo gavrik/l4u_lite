@@ -28,9 +28,10 @@ create table if not exists default_links (
 create unique index UDX_def_short_links on default_links(short_link),domain_id;
 
 create table admin_tokens (
-    id integer generated,
     token text not null,
     token_description text not null,
-    expired_at integer default 0,
+    expire_at integer default 0,
     primary key(id)
 );
+
+create unique index IDX_tokens_uuid on admin_tokens(token);
