@@ -3,4 +3,6 @@ l4u.code-workspace
 l4u.db
 lib/go.sum
 app/go.sum
+api/go.sum
 app/main
+api/main
