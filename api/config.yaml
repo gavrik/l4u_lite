@@ -1,0 +1,6 @@
+version: 1
+kind: ApiConfig
+databasePath: "./l4u.db"
+httpBindPort: 8080
+defaultLink : "./"
+apiHost: "api.localhost.local"
