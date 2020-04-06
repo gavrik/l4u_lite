@@ -22,6 +22,17 @@ var ErrWrongDBStructure = errors.New("Wrong database structure")
 // ErrUndefined - Error
 var ErrUndefined = errors.New("Strange Error")
 
+// ErrWrongDBVersion - Error
+var ErrWrongDBVersion = errors.New("Wrong database version")
+
+// SQLiteDB - highlevel DB interface
+type SQLiteDB interface {
+	SQLInit() error
+	Close()
+	CheckDBversion() (int, error)
+	GetLongLink(shortLink string, domain string, longLink *LongLink) error
+}
+
 // LongLink - Error
 type LongLink struct {
 	id       int
@@ -89,4 +100,32 @@ func (imp *SQLiteDBImplementation) GetLongLink(shortLink string, domain string, 
 		}
 	}
 	return nil
+}
+
+// NewDB - Create DB instance
+func NewDB(dbPath string) SQLiteDB {
+	db := new(SQLiteDBImplementation)
+	db.ConnString = fmt.Sprintf("%s?mode=ro", dbPath)
+	return db
+}
+
+// OpenDB - Open new SQLite3 Database
+func OpenDB(dbPath string) SQLiteDB {
+	db := NewDB(dbPath)
+	db.SQLInit()
+	return db
+}
+
+// ChackDBVersion - Check database version
+func ChackDBVersion(dbPath string) (int, error) {
+	db := OpenDB(dbPath)
+	dbversion, err := db.CheckDBversion()
+	if err != nil {
+		return 0, err
+	}
+	if dbversion != DatabaseVersion {
+		return 0, ErrWrongDBVersion
+	}
+	db.Close()
+	return dbversion, nil
 }
