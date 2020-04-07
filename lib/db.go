@@ -12,18 +12,18 @@ import (
 
 // ErrCallDB - Error
 var ErrCallDB = errors.New("Can't execute select statement")
-
 // ErrLinkNotFound - Error
 var ErrLinkNotFound = errors.New("Link not found")
-
 // ErrWrongDBStructure - Error
 var ErrWrongDBStructure = errors.New("Wrong database structure")
-
 // ErrUndefined - Error
 var ErrUndefined = errors.New("Strange Error")
-
 // ErrWrongDBVersion - Error
 var ErrWrongDBVersion = errors.New("Wrong database version")
+// ErrROOTtoken - Error
+var ErrROOTtoken = errors.New("Can't generate root token")
+// ErrInsert - Error
+var ErrInsert = errors.New("Can't insert values")
 
 // SQLiteDB - highlevel DB interface
 type SQLiteDB interface {
@@ -31,6 +31,7 @@ type SQLiteDB interface {
 	Close()
 	CheckDBversion() (int, error)
 	GetLongLink(shortLink string, domain string, longLink *LongLink) error
+	CreateROOToken() (string, error)
 }
 
 // LongLink - Error
@@ -101,6 +102,19 @@ func (imp *SQLiteDBImplementation) GetLongLink(shortLink string, domain string, 
 		}
 	}
 	return nil
+}
+
+// CreateROOToken - Create root token for API
+func (imp *SQLiteDBImplementation) CreateROOToken() (string, error) {
+	token, err := GetUUID()
+	if err != nil {
+		return "", ErrROOTtoken
+	}
+	rows, err = impl.db.Query("insert into admin_tokens (token, token_description, is_Root) values( $1, 'ROOT token', 1)", token)
+	if err != nil {
+		return "", ErrInsert
+	}
+	return token, nil
 }
 
 // NewDB - Create DB instance
