@@ -48,6 +48,7 @@ func init() {
 type SQLiteDBImplementation struct {
 	db         *sql.DB
 	ConnString string
+	isWritable bool
 }
 
 // SQLInit - Init database instance
@@ -103,15 +104,23 @@ func (imp *SQLiteDBImplementation) GetLongLink(shortLink string, domain string, 
 }
 
 // NewDB - Create DB instance
-func NewDB(dbPath string) SQLiteDB {
+func newDB(dbPath string, dbMode string) SQLiteDB {
 	db := new(SQLiteDBImplementation)
-	db.ConnString = fmt.Sprintf("%s?mode=ro", dbPath)
+	db.ConnString = fmt.Sprintf("%s?mode=%s", dbPath, dbMode)
+	db.isWritable = false
 	return db
 }
 
-// OpenDB - Open new SQLite3 Database
+// OpenDB - Open new SQLite3 read only database 
 func OpenDB(dbPath string) SQLiteDB {
-	db := NewDB(dbPath)
+	db := newDB(dbPath, "ro")
+	db.SQLInit()
+	return db
+}
+
+// OpenDBrw - Open new SQLite3 database for read and write operations
+func OpenDBrw(dbPath string) SQLiteDB {
+	db := newDB(dbPath, "rw")
 	db.SQLInit()
 	return db
 }
@@ -124,7 +133,7 @@ func ChackDBVersion(dbPath string) (int, error) {
 		return 0, err
 	}
 	if dbversion != DatabaseVersion {
-		return 0, ErrWrongDBVersion
+		return dbversion, ErrWrongDBVersion
 	}
 	db.Close()
 	return dbversion, nil
