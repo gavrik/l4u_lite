@@ -25,15 +25,14 @@ create table if not exists default_links (
     primary key(id)
 );
 
-create unique index UDX_def_short_links on default_links(short_link),domain_id;
+create unique index UDX_def_short_links on default_links(short_link,domain_id);
 
 create table admin_tokens (
     token text not null,
     token_description text not null,
     domain_id integer null,
     expire_at integer default 0,
-    is_Root integer not null default 0 check (is_Root == 0 or is_Root == 1),
-    primary key(id)
+    is_Root integer not null default 0 check (is_Root == 0 or is_Root == 1)
 );
 
 create unique index IDX_tokens_uuid on admin_tokens(token);
