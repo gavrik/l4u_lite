@@ -12,16 +12,22 @@ import (
 
 // ErrCallDB - Error
 var ErrCallDB = errors.New("Can't execute select statement")
+
 // ErrLinkNotFound - Error
 var ErrLinkNotFound = errors.New("Link not found")
+
 // ErrWrongDBStructure - Error
 var ErrWrongDBStructure = errors.New("Wrong database structure")
+
 // ErrUndefined - Error
 var ErrUndefined = errors.New("Strange Error")
+
 // ErrWrongDBVersion - Error
 var ErrWrongDBVersion = errors.New("Wrong database version")
+
 // ErrROOTtoken - Error
 var ErrROOTtoken = errors.New("Can't generate root token")
+
 // ErrInsert - Error
 var ErrInsert = errors.New("Can't insert values")
 
@@ -47,27 +53,27 @@ func init() {
 
 // SQLiteDBImplementation - SQLite data access implementation
 type SQLiteDBImplementation struct {
-	db         *sql.DB
+	Db         *sql.DB
 	ConnString string
-	isWritable bool
+	IsWritable bool
 }
 
 // SQLInit - Init database instance
-func (imp *SQLiteDBImplementation) SQLInit() error {
+func (impl *SQLiteDBImplementation) SQLInit() error {
 	var err error
-	imp.db, err = sql.Open("sqlite3", imp.ConnString)
+	impl.Db, err = sql.Open("sqlite3", impl.ConnString)
 	return err
 }
 
 // Close - Close database instance
-func (imp *SQLiteDBImplementation) Close() {
-	imp.db.Close()
+func (impl *SQLiteDBImplementation) Close() {
+	impl.Db.Close()
 }
 
 // CheckDBversion - Check database schema version
-func (imp *SQLiteDBImplementation) CheckDBversion() (int, error) {
+func (impl *SQLiteDBImplementation) CheckDBversion() (int, error) {
 	var row string
-	rows, err := imp.db.Query("select val from settings where key = 'VERSION' ")
+	rows, err := impl.Db.Query("select val from settings where key = 'VERSION' ")
 	defer rows.Close()
 	if err != nil {
 		return 0, ErrCallDB
@@ -83,13 +89,13 @@ func (imp *SQLiteDBImplementation) CheckDBversion() (int, error) {
 }
 
 // GetLongLink - Get Long link from db
-func (imp *SQLiteDBImplementation) GetLongLink(shortLink string, domain string, longLink *LongLink) error {
+func (impl *SQLiteDBImplementation) GetLongLink(shortLink string, domain string, longLink *LongLink) error {
 	var err error
 	var rows *sql.Rows
 	if domain == "" {
-		rows, err = imp.db.Query("select id, long_link from default_links where short_link = $1 and domain_id is null and is_enabled = 1", shortLink)
+		rows, err = impl.Db.Query("select id, long_link from default_links where short_link = $1 and domain_id is null and is_enabled = 1", shortLink)
 	} else {
-		rows, err = imp.db.Query("select id, long_link from default_links where short_link = $1 and domain_id = $2 and is_enabled = 1", shortLink, domain)
+		rows, err = impl.Db.Query("select id, long_link from default_links where short_link = $1 and domain_id = $2 and is_enabled = 1", shortLink, domain)
 	}
 	defer rows.Close()
 	if err != nil {
@@ -105,12 +111,12 @@ func (imp *SQLiteDBImplementation) GetLongLink(shortLink string, domain string, 
 }
 
 // CreateROOToken - Create root token for API
-func (imp *SQLiteDBImplementation) CreateROOToken() (string, error) {
+func (impl *SQLiteDBImplementation) CreateROOToken() (string, error) {
 	token, err := GetUUID()
 	if err != nil {
 		return "", ErrROOTtoken
 	}
-	rows, err = impl.db.Query("insert into admin_tokens (token, token_description, is_Root) values( $1, 'ROOT token', 1)", token)
+	_, err = impl.Db.Query("insert into admin_tokens (token, token_description, is_Root) values( $1, 'ROOT token', 1)", token)
 	if err != nil {
 		return "", ErrInsert
 	}
@@ -121,11 +127,11 @@ func (imp *SQLiteDBImplementation) CreateROOToken() (string, error) {
 func newDB(dbPath string, dbMode string) SQLiteDB {
 	db := new(SQLiteDBImplementation)
 	db.ConnString = fmt.Sprintf("%s?mode=%s", dbPath, dbMode)
-	db.isWritable = false
+	db.IsWritable = false
 	return db
 }
 
-// OpenDB - Open new SQLite3 read only database 
+// OpenDB - Open new SQLite3 read only database
 func OpenDB(dbPath string) SQLiteDB {
 	db := newDB(dbPath, "ro")
 	db.SQLInit()
