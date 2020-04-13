@@ -1,6 +1,10 @@
 package lib
 
-// DefaultConfigPath - 
+// DefaultConfigPath -
 const DefaultConfigPath string = "./config.yaml"
-// DatabaseVersion - 
+
+// DatabaseVersion -
 const DatabaseVersion int = 1
+
+// RandomStringHashLength - Default length for generated hash
+const RandomStringHashLength int = 6
