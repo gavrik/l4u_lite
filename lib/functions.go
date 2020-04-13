@@ -2,11 +2,15 @@ package lib
 
 import (
 	"errors"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/gofrs/uuid"
 )
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 // ErrEnvNotExist - Error
 var ErrEnvNotExist = errors.New("Lib: Environment variable is not exist")
@@ -36,4 +40,19 @@ func GetUUID() (string, error) {
 		return "", ErrNoUUID
 	}
 	return uuid.String(), nil
+}
+
+// stringWithCharset -
+func stringWithCharset(length int, charset string) string {
+	var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
+// RandomString -
+func RandomString(length int) string {
+	return stringWithCharset(length, charset)
 }
