@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"lib"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,7 +34,7 @@ func RESTErrorFunc(errNo int, errMsg string) RESTError {
 func GetAuthorizationToken(c *gin.Context) string {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader != "" {
-		return authHeader[6:len(authHeader)]
+		return authHeader[6:]
 	}
 	return ""
 }
@@ -49,4 +50,14 @@ func TokenAuthorization() gin.HandlerFunc {
 			c.Set(AuthTokenKey, AdminToken{})
 		}
 	}
+}
+
+// IsAuthorized -
+func IsAuthorized(c *gin.Context) bool {
+	token := c.MustGet(AuthTokenKey).(AdminToken)
+	if token.Token == "" {
+		c.JSON(http.StatusUnauthorized, RESTErrorFunc(1, "NotUthorized"))
+		return false
+	}
+	return true
 }

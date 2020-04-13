@@ -50,7 +50,8 @@ func main() {
 	populateAdminCache(config.DatabasePath)
 
 	engine := lib.CreateGINEnvironment()
-	linkRoutes := engine.Group("/link", TokenAuthorization())
+	engine.Use(TokenAuthorization())
+	linkRoutes := engine.Group("/link")
 	link := NewLink()
 
 	// Create new token
@@ -66,13 +67,13 @@ func main() {
 	// Get domain info
 	//engine.GET("/domain/info/:domain")
 	// Get link info
-	//engine.GET("/link/info/:domain/:link_hash")
+	linkRoutes.GET("/info/:domain/:link_hash", link.Get)
 	// Get all link info depending to domain
-	//engine.GET("/link/info/:domain")
+	//engine.GET("/link/info/:domain", link.Get)
 	// Create new short link
 	linkRoutes.POST("/create", link.Post)
 	// Delete short link
-	//engine.DELETE("/link/delete/:domain/:link_hash")
+	//engine.DELETE("/delete/:domain/:link_hash", link.Delete)
 
 	//
 	engine.Run(fmt.Sprintf(":%d", config.HTTPBindPort))
