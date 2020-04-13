@@ -16,16 +16,13 @@ create table if not exists domain (
 );
 
 create table if not exists default_links (
-    id integer generated, 
     short_link text not null,
     long_link text not null,
-    domain_id integer default null,
     is_enabled integer not null default 0 check (is_enabled == 0 or is_enabled == 1), 
-    created_on integer not null default (strftime('%s','now')),
-    primary key(id)
+    created_on integer not null default (strftime('%s','now'))
 );
 
-create unique index UDX_def_short_links on default_links(short_link,domain_id);
+create unique index UDX_def_short_links on default_links(short_link);
 
 create table admin_tokens (
     token text not null,
