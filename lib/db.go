@@ -37,7 +37,6 @@ type SQLiteDB interface {
 	Close()
 	CheckDBversion() (int, error)
 	GetLongLink(shortLink string, domain string, longLink *LongLink) error
-	CreateROOToken() (string, error)
 }
 
 // LongLink - Error
@@ -108,19 +107,6 @@ func (impl *SQLiteDBImplementation) GetLongLink(shortLink string, domain string,
 		}
 	}
 	return nil
-}
-
-// CreateROOToken - Create root token for API
-func (impl *SQLiteDBImplementation) CreateROOToken() (string, error) {
-	token, err := GetUUID()
-	if err != nil {
-		return "", ErrROOTtoken
-	}
-	_, err = impl.Db.Query("insert into admin_tokens (token, token_description, is_Root) values( $1, 'ROOT token', 1)", token)
-	if err != nil {
-		return "", ErrInsert
-	}
-	return token, nil
 }
 
 // NewDB - Create DB instance
