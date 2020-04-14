@@ -10,6 +10,12 @@ import (
 // ErrAdminToken - Error
 var ErrAdminToken = errors.New("Can't populate Admin Tokens Map")
 
+// ErrDbNotWritable - Error
+var ErrDbNotWritable = errors.New("DB is not open for write operations")
+
+// ErrLinkNotFound - Error
+var ErrLinkNotFound = errors.New("Link hash was not found in database")
+
 // APISQLiteDB -
 type APISQLiteDB struct {
 	lib.SQLiteDBImplementation
@@ -39,6 +45,9 @@ func (impl *APISQLiteDB) GetAdminTokens(tokenMap map[string]AdminToken) error {
 
 // PutLink -
 func (impl *APISQLiteDB) PutLink(newLink *Link) error {
+	if !impl.IsWritable {
+		return ErrDbNotWritable
+	}
 	var rows *sql.Rows
 	stm, err := impl.Db.Prepare("insert into default_links(short_link,long_link,is_enabled) values(?,?,?)")
 	if err != nil {
@@ -61,14 +70,44 @@ func (impl *APISQLiteDB) PutLink(newLink *Link) error {
 }
 
 // GetLink -
-func (impl *APISQLiteDB) GetLink(linkHash string, link *Link) error {
-	rows, err := impl.Db.Query("select short_link, long_link, is_enabled, created_on from default_links where short_link = $1", linkHash)
+func (impl *APISQLiteDB) GetLink(link *Link) error {
+	rows, err := impl.Db.Query("select long_link, is_enabled, created_on from default_links where short_link = $1", link.ShortLink)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&link.ShortLink, &link.LongLink, &link.IsEnabled, &link.CreationOn)
+		err = rows.Scan(&link.LongLink, &link.IsEnabled, &link.CreationOn)
+	}
+	return err
+}
+
+// DeleteLink -
+func (impl *APISQLiteDB) DeleteLink(link *Link) error {
+	if !impl.IsWritable {
+		return ErrDbNotWritable
+	}
+	_, err := impl.Db.Exec("delete from default_links where short_link = $1", link.ShortLink)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+// UpdateLink -
+func (impl *APISQLiteDB) UpdateLink(link *Link) error {
+	if !impl.IsWritable {
+		return ErrDbNotWritable
+	}
+	var n int64
+	res, err := impl.Db.Exec("update default_links set long_link = $1, is_enabled = $2 where short_link = $3",
+		link.LongLink, link.IsEnabled, link.ShortLink)
+	if err != nil {
+		return err
+	}
+	n, err = res.RowsAffected()
+	if err != nil || n == 0 {
+		err = ErrLinkNotFound
 	}
 	return err
 }

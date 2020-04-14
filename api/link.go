@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"lib"
 	"net/http"
 
@@ -14,7 +13,6 @@ type LinkImplementation struct {
 }
 
 // Post - Create
-// curl --data '{"shortLink": "test-link_1"}' --header "Authorization: TOKEN e319e2a5-95f5-48fd-bbc9-7315df21c382" http://127.0.0.1:8081/link/create
 func (impl *LinkImplementation) Post(c *gin.Context) {
 	if !IsAuthorized(c) {
 		return
@@ -27,29 +25,70 @@ func (impl *LinkImplementation) Post(c *gin.Context) {
 	db := NewAPIDB(config.DatabasePath)
 	defer db.Close()
 	err := db.PutLink(&link)
-	fmt.Println(err)
+	if err != nil {
+		c.JSON(http.StatusNotFound, RESTErrorFunc(5, err.Error()))
+		return
+	}
 
 	c.JSON(http.StatusOK, link)
 }
 
-// Get - Get info
+// Get - Get link info
 func (impl *LinkImplementation) Get(c *gin.Context) {
 	if !IsAuthorized(c) {
 		return
 	}
 	var link Link
-	shortLink := c.Param("link_hash")
-	domain := c.Param("domain")
+	link.ShortLink = c.Param("link_hash")
+	link.Domain = c.Param("domain")
 	db := NewAPIDBro(config.DatabasePath)
 	defer db.Close()
-	link.Domain = domain
-	err := db.GetLink(shortLink, &link)
-	fmt.Println(err)
+	err := db.GetLink(&link)
+	if err != nil {
+		c.JSON(http.StatusNotFound, RESTErrorFunc(5, err.Error()))
+		return
+	}
 
 	c.JSON(http.StatusOK, link)
 }
 
-// Delete - delete
+// Delete - delete link from database
 func (impl *LinkImplementation) Delete(c *gin.Context) {
-	return
+	if !IsAuthorized(c) {
+		return
+	}
+	var link Link
+	link.ShortLink = c.Param("link_hash")
+	link.Domain = c.Param("domain")
+	db := NewAPIDB(config.DatabasePath)
+	defer db.Close()
+	err := db.DeleteLink(&link)
+	if err != nil {
+		c.JSON(http.StatusNotFound, RESTErrorFunc(5, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, RESTErrorFunc(2, "HashLinkDeleted"))
+}
+
+// Patch - update link parameters
+func (impl *LinkImplementation) Patch(c *gin.Context) {
+	if !IsAuthorized(c) {
+		return
+	}
+	var link Link
+	c.BindJSON(&link)
+	if link.ShortLink == "" {
+		c.JSON(http.StatusBadRequest, RESTErrorFunc(4, "HashLinkBadRequest"))
+		return
+	}
+	db := NewAPIDB(config.DatabasePath)
+	defer db.Close()
+	err := db.UpdateLink(&link)
+	if err != nil {
+		c.JSON(http.StatusNotFound, RESTErrorFunc(5, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, RESTErrorFunc(3, "HashLinkUpdated"))
 }

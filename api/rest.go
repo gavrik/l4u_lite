@@ -16,6 +16,7 @@ type REST interface {
 	Post(c *gin.Context)
 	Get(c *gin.Context)
 	Delete(c *gin.Context)
+	Patch(c *gin.Context)
 }
 
 // NewLink - REST implementation for link section
