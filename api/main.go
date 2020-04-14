@@ -73,7 +73,9 @@ func main() {
 	// Create new short link
 	linkRoutes.POST("/create", link.Post)
 	// Delete short link
-	//engine.DELETE("/delete/:domain/:link_hash", link.Delete)
+	linkRoutes.DELETE("/delete/:domain/:link_hash", link.Delete)
+	// Update link parameters
+	linkRoutes.PATCH("/patch", link.Patch)
 
 	//
 	engine.Run(fmt.Sprintf(":%d", config.HTTPBindPort))
