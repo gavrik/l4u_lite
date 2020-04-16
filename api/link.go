@@ -48,6 +48,9 @@ func (impl *LinkImplementation) Get(c *gin.Context) {
 		c.JSON(http.StatusNotFound, RESTErrorFunc(5, err.Error()))
 		return
 	}
+	if link.LongLink == "" {
+		c.JSON(http.StatusNotFound, RESTErrorFunc(6, "LinkInfoNotFound"))
+	}
 
 	c.JSON(http.StatusOK, link)
 }

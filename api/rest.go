@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"lib"
 	"net/http"
 
@@ -34,6 +33,9 @@ func RESTErrorFunc(errNo int, errMsg string) RESTError {
 // GetAuthorizationToken -
 func GetAuthorizationToken(c *gin.Context) string {
 	authHeader := c.GetHeader("Authorization")
+	if authHeader[:5] != "TOKEN" {
+		return ""
+	}
 	if authHeader != "" {
 		return authHeader[6:]
 	}
@@ -44,7 +46,7 @@ func GetAuthorizationToken(c *gin.Context) string {
 func TokenAuthorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenHash := GetAuthorizationToken(c)
-		fmt.Println(tokenHash)
+		//fmt.Println(tokenHash)
 		if token, ok := TokenCache[tokenHash]; ok {
 			c.Set(AuthTokenKey, token)
 		} else {
@@ -57,7 +59,7 @@ func TokenAuthorization() gin.HandlerFunc {
 func IsAuthorized(c *gin.Context) bool {
 	token := c.MustGet(AuthTokenKey).(AdminToken)
 	if token.Token == "" {
-		c.JSON(http.StatusUnauthorized, RESTErrorFunc(1, "NotUthorized"))
+		c.JSON(http.StatusUnauthorized, RESTErrorFunc(1, "NotAuthorized"))
 		return false
 	}
 	return true
