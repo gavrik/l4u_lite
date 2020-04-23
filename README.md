@@ -1,19 +1,18 @@
 # Link For You
 
-Count number of open connection in an sql database
+## REST API Documentation
 
-```bash
-lsof dbName.db
-```
+### Link management
 
-## API
+- [Create new link](doc/link_post.md) : `POST /link/create`
+- [Get link information](doc/link_get.md) : `GET /link/info/:domain/:hash`
+- [Delete link](doc/link_delete.md) : `DELETE /link/delete/:domain/:hash`
+- [Edit link parameters](doc/link_patch.md) : `PATCH /link/patch`
+  
+## Troubleshouting
 
-POST: /link/create  
-{"longLink":"long_link_url","shortLink":"short_link_string","domain":"","isEnabled":true|false}
+- Count number of open connections on sqlite database
 
-GET: /link/info/:domain/:hash  
-
-PATCH: /link/patch  
-{"longLink":"long_link_url","shortLink":"short_link_string","domain":"","isEnabled":true|false}
-
-DELETE: /link/delete/:domain/:hash  
+    ```bash
+    lsof dbName.db
+    ```
