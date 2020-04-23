@@ -14,6 +14,7 @@ var config = new(AppConfig)
 type AppConfig struct {
 	Version      int    `yaml:"version"`
 	Kind         string `yaml:"kind"`
+	IsDebug      bool   `yaml:"isDebug"`
 	HTTPBindPort int    `yaml:"httpBindPort"`
 	DatabasePath string `yaml:"databasePath"`
 	DefaultLink  string `yaml:"defaultLink"`
@@ -30,11 +31,8 @@ func populateAdminCache(dbPath string) {
 
 	err := db.GetAdminTokens(TokenCache)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
-
-	fmt.Println(TokenCache)
-
 }
 
 func main() {
@@ -42,16 +40,22 @@ func main() {
 	configPath, _ := lib.ReadEnvironmentVariable("CONFIG_PATH", lib.DefaultConfigPath)
 
 	lib.ParseConfig(configPath, config)
-	fmt.Println(config)
+	if config.IsDebug {
+		fmt.Println(config)
+	}
 
 	dbversion, _ = lib.ChackDBVersion(config.DatabasePath)
-	fmt.Println(dbversion)
+	fmt.Printf("Database structure version: %d", dbversion)
 
 	populateAdminCache(config.DatabasePath)
+	if config.IsDebug {
+		fmt.Println(TokenCache)
+	}
 
-	engine := lib.CreateGINEnvironment()
+	engine := lib.CreateGINEnvironment(config.IsDebug)
 	engine.Use(TokenAuthorization())
 	linkRoutes := engine.Group("/link")
+	//adminRoutes := engine.Group("/admin")
 	link := NewLink()
 
 	// Create new token

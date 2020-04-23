@@ -28,9 +28,12 @@ func ReadEnvironmentVariable(key string, defaultValue string) (string, error) {
 }
 
 // CreateGINEnvironment - Create default GIN engine and return it
-func CreateGINEnvironment() *gin.Engine {
-	router := gin.Default()
-	return router
+func CreateGINEnvironment(isDebug bool) *gin.Engine {
+	e := gin.Default()
+	if !isDebug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	return e
 }
 
 // GetUUID - Generate unique UUID
