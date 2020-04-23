@@ -21,7 +21,7 @@ type APISQLiteDB struct {
 	lib.SQLiteDBImplementation
 }
 
-// GetAdminTokens -
+// GetAdminTokens - load admin tokens to HashMap
 func (impl *APISQLiteDB) GetAdminTokens(tokenMap map[string]AdminToken) error {
 	rows, err := impl.Db.Query("select t.token, t.token_description, ifnull(d.domain_name,''), t.expire_at, t.is_Root from admin_tokens t left join domain d on t.domain_id = d.id;")
 	if err != nil {
@@ -43,7 +43,7 @@ func (impl *APISQLiteDB) GetAdminTokens(tokenMap map[string]AdminToken) error {
 	return err
 }
 
-// PutLink -
+// PutLink - Create new link record
 func (impl *APISQLiteDB) PutLink(newLink *Link) error {
 	if !impl.IsWritable {
 		return ErrDbNotWritable
@@ -69,7 +69,7 @@ func (impl *APISQLiteDB) PutLink(newLink *Link) error {
 	return err
 }
 
-// GetLink -
+// GetLink - Get full link info
 func (impl *APISQLiteDB) GetLink(link *Link) error {
 	rows, err := impl.Db.Query("select long_link, is_enabled, created_on from default_links where short_link = $1", link.ShortLink)
 	if err != nil {
@@ -82,7 +82,7 @@ func (impl *APISQLiteDB) GetLink(link *Link) error {
 	return err
 }
 
-// DeleteLink -
+// DeleteLink - Delete link record
 func (impl *APISQLiteDB) DeleteLink(link *Link) error {
 	if !impl.IsWritable {
 		return ErrDbNotWritable
@@ -94,7 +94,7 @@ func (impl *APISQLiteDB) DeleteLink(link *Link) error {
 	return err
 }
 
-// UpdateLink -
+// UpdateLink - Update link parameters
 func (impl *APISQLiteDB) UpdateLink(link *Link) error {
 	if !impl.IsWritable {
 		return ErrDbNotWritable

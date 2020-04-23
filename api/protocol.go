@@ -2,8 +2,8 @@ package main
 
 // RESTError - The main Error structure
 type RESTError struct {
-	ErrorNo  int
-	ErrorMsg string
+	ErrorNo  int    `json:"error_number"`
+	ErrorMsg string `json:"error_message"`
 }
 
 // AdminToken - The main token structure

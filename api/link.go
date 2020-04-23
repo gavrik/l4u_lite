@@ -12,7 +12,7 @@ type LinkImplementation struct {
 	Db lib.SQLiteDB
 }
 
-// Post - Create
+// Post - Create new link
 func (impl *LinkImplementation) Post(c *gin.Context) {
 	if !IsAuthorized(c) {
 		return
@@ -55,7 +55,7 @@ func (impl *LinkImplementation) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, link)
 }
 
-// Delete - delete link from database
+// Delete - Delete link from database
 func (impl *LinkImplementation) Delete(c *gin.Context) {
 	if !IsAuthorized(c) {
 		return
@@ -74,7 +74,7 @@ func (impl *LinkImplementation) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, RESTErrorFunc(2, "HashLinkDeleted"))
 }
 
-// Patch - update link parameters
+// Patch - Update link parameters
 func (impl *LinkImplementation) Patch(c *gin.Context) {
 	if !IsAuthorized(c) {
 		return

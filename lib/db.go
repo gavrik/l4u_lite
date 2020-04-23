@@ -39,7 +39,7 @@ type SQLiteDB interface {
 	GetLongLink(shortLink string, domain string, longLink *LongLink) error
 }
 
-// LongLink - Error
+// LongLink -
 type LongLink struct {
 	id       int
 	LongLink string
@@ -109,7 +109,7 @@ func (impl *SQLiteDBImplementation) GetLongLink(shortLink string, domain string,
 	return nil
 }
 
-// NewDB - Create DB instance
+// newDB - Create DB instance
 func newDB(dbPath string, dbMode string) SQLiteDB {
 	db := new(SQLiteDBImplementation)
 	db.ConnString = fmt.Sprintf("%s?mode=%s", dbPath, dbMode)
