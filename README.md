@@ -9,7 +9,7 @@
 - [Delete link](doc/link_delete.md) : `DELETE /link/delete/:domain/:hash`
 - [Edit link parameters](doc/link_patch.md) : `PATCH /link/patch`
   
-## Troubleshouting
+## Troubleshooting
 
 - Count number of open connections on sqlite database
 

@@ -59,3 +59,12 @@ func stringWithCharset(length int, charset string) string {
 func RandomString(length int) string {
 	return stringWithCharset(length, charset)
 }
+
+// IsFileExixts - check
+func IsFileExixts(filePath string) bool {
+	info, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}

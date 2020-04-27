@@ -5,3 +5,4 @@ databasePath: "../l4u.db"
 httpBindPort: 8081
 defaultLink : "./"
 apiHost: "api.localhost.local"
+isCreateDB: true

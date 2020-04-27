@@ -19,6 +19,7 @@ type AppConfig struct {
 	DatabasePath string `yaml:"databasePath"`
 	DefaultLink  string `yaml:"defaultLink"`
 	APIHost      string `yaml:"apiHost"`
+	IsCreateDB   bool   `yaml:"isCreateDB"`
 }
 
 // TokenCache - Admin Tokens Cache
@@ -37,6 +38,7 @@ func populateAdminCache(dbPath string) {
 
 func main() {
 	var dbversion int
+	var err error
 	configPath, _ := lib.ReadEnvironmentVariable("CONFIG_PATH", lib.DefaultConfigPath)
 
 	lib.ParseConfig(configPath, config)
@@ -44,10 +46,24 @@ func main() {
 		fmt.Println(config)
 	}
 
-	dbversion, _ = lib.ChackDBVersion(config.DatabasePath)
-	fmt.Printf("Database structure version: %d", dbversion)
+	if !lib.IsFileExixts(config.DatabasePath) && config.IsCreateDB {
+		fmt.Println("Create fresh database structure")
+		err = CreateFreshDB(config)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	dbversion, err = lib.ChackDBVersion(config.DatabasePath)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Database structure version: %d\n", dbversion)
 
 	populateAdminCache(config.DatabasePath)
+	if len(TokenCache) == 0 {
+		panic("Admin Token Cache are empty. Exiting.")
+	}
 	if config.IsDebug {
 		fmt.Println(TokenCache)
 	}

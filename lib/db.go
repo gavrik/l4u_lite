@@ -73,10 +73,10 @@ func (impl *SQLiteDBImplementation) Close() {
 func (impl *SQLiteDBImplementation) CheckDBversion() (int, error) {
 	var row string
 	rows, err := impl.Db.Query("select val from settings where key = 'VERSION' ")
-	defer rows.Close()
 	if err != nil {
 		return 0, ErrCallDB
 	}
+	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&row)
 		if err != nil {

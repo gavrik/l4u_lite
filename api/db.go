@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"lib"
+	"strings"
 )
 
 // ErrAdminToken - Error
@@ -15,6 +17,9 @@ var ErrDbNotWritable = errors.New("DB is not open for write operations")
 
 // ErrLinkNotFound - Error
 var ErrLinkNotFound = errors.New("Link hash was not found in database")
+
+// ErrDBExists - Error
+var ErrDBExists = errors.New("Database Exists. Do not need create fresh schema")
 
 // APISQLiteDB -
 type APISQLiteDB struct {
@@ -132,4 +137,36 @@ func NewAPIDBro(dbPath string) *APISQLiteDB {
 	db.IsWritable = false
 	db.SQLInit()
 	return db
+}
+
+// CreateFreshDB - create fresh database and load default structure to it
+func CreateFreshDB(config *AppConfig) error {
+	if !config.IsCreateDB {
+		return nil
+	}
+	if lib.IsFileExixts(config.DatabasePath) {
+		return ErrDBExists
+	}
+
+	DB := NewAPIDB(config.DatabasePath)
+
+	file, err := ioutil.ReadFile(lib.FreshDBSQLFile)
+	if err != nil {
+		fmt.Println(err)
+	}
+	queres := strings.Split(string(file), ";")
+
+	for _, query := range queres {
+		if config.IsDebug {
+			fmt.Println("*** Execute sql statement")
+			fmt.Println(query)
+		}
+
+		if len(query) > 4 {
+			_, err := DB.Db.Exec(query)
+			fmt.Println(err)
+		}
+	}
+
+	return nil
 }
