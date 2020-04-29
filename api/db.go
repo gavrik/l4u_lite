@@ -26,6 +26,31 @@ type APISQLiteDB struct {
 	lib.SQLiteDBImplementation
 }
 
+// CreateAdminToken - create tokens for REST access
+func (impl *APISQLiteDB) CreateAdminToken(tokenHash string, isRoot bool, desc string, expireAt int) error {
+	var numRows int64 = 0
+	var err error
+	var stm *sql.Stmt
+	var result sql.Result
+	stm, err = impl.Db.Prepare("insert into admin_tokens (token, token_description, is_Root, expire_at) values(?,?,?,?)")
+	if err != nil {
+		return err
+	}
+	defer stm.Close()
+	result, err = stm.Exec(tokenHash, desc, isRoot, expireAt)
+	if err != nil {
+		return err
+	}
+	numRows, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if numRows > 0 {
+		return nil
+	}
+	return nil
+}
+
 // GetAdminTokens - load admin tokens to HashMap
 func (impl *APISQLiteDB) GetAdminTokens(tokenMap map[string]AdminToken) error {
 	rows, err := impl.Db.Query("select t.token, t.token_description, ifnull(d.domain_name,''), t.expire_at, t.is_Root from admin_tokens t left join domain d on t.domain_id = d.id;")
@@ -149,6 +174,7 @@ func CreateFreshDB(config *AppConfig) error {
 	}
 
 	DB := NewAPIDB(config.DatabasePath)
+	defer DB.Db.Close()
 
 	file, err := ioutil.ReadFile(lib.FreshDBSQLFile)
 	if err != nil {
@@ -167,6 +193,17 @@ func CreateFreshDB(config *AppConfig) error {
 			fmt.Println(err)
 		}
 	}
+	token, err := lib.GetUUID()
+	if err != nil {
+		return err
+	}
+	err = DB.CreateAdminToken(token, true, "ROOT TOKEN. DO NOT DELETE IT!!!!", 0)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("\n\n\n* * * * * INITIAL ROOT TOKEN * * * * *\n")
+	fmt.Printf("\n %s \n\n", token)
+	fmt.Printf("* * * * * * * * * * * * * * * * * * * *\n\n\n")
 
 	return nil
 }
