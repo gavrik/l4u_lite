@@ -30,7 +30,7 @@ func (impl *LinkImplementation) Post(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, link)
+	c.JSON(http.StatusCreated, link)
 }
 
 // Get - Get link info
